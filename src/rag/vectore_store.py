@@ -2,6 +2,8 @@
 
 import chromadb
 
+from .rag import Chunk
+
 
 class ChromaVectorStore:
     """Persist chunk embeddings in a local Chroma database and retrieve nearest matches."""
@@ -44,7 +46,7 @@ class ChromaVectorStore:
         self,
         embedding: list[float],
         top_k: int = 5,
-    ) -> list[str]:
+    ) -> list[Chunk]:
         """Return the top matching chunk texts for a query embedding."""
 
         results = self.collection.query(
@@ -52,4 +54,13 @@ class ChromaVectorStore:
             n_results=top_k,
         )
 
-        return results["documents"][0]
+        documents = results["documents"][0]
+        metadatas = results["metadatas"][0]
+
+        return [
+            Chunk(
+                text=text,
+                metadata=metadata,
+            )
+            for text, metadata in zip(documents, metadatas)
+        ]

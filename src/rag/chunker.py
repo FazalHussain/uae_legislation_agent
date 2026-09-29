@@ -8,6 +8,7 @@ that can be indexed and searched efficiently.
 import re
 
 from .rag import Chunk
+from .loader import DocumentPage
 
 
 class SmartChunker:
@@ -21,7 +22,10 @@ class SmartChunker:
         """Return text chunks with metadata describing their source page and article."""
         chunks: list[Chunk] = []
 
-        for page_number, page in enumerate(documents, start=1):
+        for document in documents:
+            page_number = document.page
+            source = document.source
+            page = document.text
 
             articles = self._extract_articles(page)
 
@@ -36,6 +40,10 @@ class SmartChunker:
                             Chunk(
                                 text=clause_text,
                                 metadata={
+                                    "chunk_id": (
+                                        f"{source}:{page_number}:"
+                                        f"{article_title}:{clause_number}"
+                                    ),
                                     "page": page_number,
                                     "article": article_title,
                                     "clause": clause_number,
@@ -56,11 +64,16 @@ class SmartChunker:
                                 Chunk(
                                     text=smaller_chunk,
                                     metadata={
+                                        "chunk_id": (
+                                            f"{source}:{page_number}:"
+                                            f"{article_title}:{clause_number}:part{index}"
+                                        ),
+                                        "source": source,
                                         "page": page_number,
                                         "article": article_title,
                                         "clause": clause_number,
                                         "part": index,
-                                    },
+                                    }
                                 )
                             )
 

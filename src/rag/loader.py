@@ -1,13 +1,20 @@
 """File-loading utilities for extracting text from PDF legal documents."""
 
 from pathlib import Path
+from dataclasses import dataclass
 from pypdf import PdfReader
+
+@dataclass
+class DocumentPage:
+    text: str
+    source: str
+    page: int
 
 
 class PDFLoader:
     """Load one or more PDF files and return their page text as strings."""
 
-    def load(self, path: str) -> list[str]:
+    def load(self, path: str) -> list[DocumentPage]:
         """Read a PDF file or a directory of PDFs and return all extracted page texts."""
         path = Path(path)
 
@@ -33,6 +40,12 @@ class PDFLoader:
             text = page.extract_text()
 
             if text:
-                pages.append(text.strip())
+                pages.append(
+                    DocumentPage(
+                        text=text.strip(), 
+                        source=path.name, 
+                        page=page.page_number
+                    )
+                )
 
         return pages
