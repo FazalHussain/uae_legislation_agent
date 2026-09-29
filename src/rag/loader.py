@@ -1,10 +1,14 @@
+"""File-loading utilities for extracting text from PDF legal documents."""
+
 from pathlib import Path
 from pypdf import PdfReader
 
 
 class PDFLoader:
+    """Load one or more PDF files and return their page text as strings."""
 
     def load(self, path: str) -> list[str]:
+        """Read a PDF file or a directory of PDFs and return all extracted page texts."""
         path = Path(path)
 
         if path.is_dir():

@@ -1,14 +1,24 @@
+"""
+Chunking utilities for splitting legal text into retrieval-friendly segments.
+
+This module turns long legislative pages into article, clause, and sub-clause chunks
+that can be indexed and searched efficiently.
+"""
+
 import re
 
 from .rag import Chunk
 
 
 class SmartChunker:
+    """Split legal documents into article- and clause-aware chunks."""
 
     def __init__(self, max_chars: int = 2000):
+        """Store the maximum character length allowed for each chunk."""
         self.max_chars = max_chars
 
     def split(self, documents: list[str]) -> list[Chunk]:
+        """Return text chunks with metadata describing their source page and article."""
         chunks: list[Chunk] = []
 
         for page_number, page in enumerate(documents, start=1):
@@ -64,6 +74,7 @@ class SmartChunker:
         self,
         text: str,
     ) -> list[tuple[str, str]]:
+        """Find article boundaries and return text grouped by article heading."""
 
         pattern = r"(?mi)^\s*Article\s*\(\s*(\d+)\s*\)\s*$"
 
@@ -105,6 +116,7 @@ class SmartChunker:
         self,
         article_text: str,
     ) -> list[tuple[str, str]]:
+        """Extract numbered clauses inside an article, or treat the article as one block."""
 
         # Supports:
         #
@@ -159,6 +171,7 @@ class SmartChunker:
         self,
         clause: str,
     ) -> list[str]:
+        """Break oversized clauses into paragraph and sub-clause chunks that fit the size limit."""
 
         paragraphs = self._split_paragraphs(clause)
 
@@ -207,6 +220,7 @@ class SmartChunker:
         self,
         text: str,
     ) -> list[str]:
+        """Normalize spacing and split the text into paragraph units."""
 
         # Normalize excessive whitespace
         text = re.sub(r"[ \t]+", " ", text)
@@ -231,6 +245,7 @@ class SmartChunker:
         self,
         text: str,
     ) -> list[str]:
+        """Split a large clause by alphabetic sub-items such as a., b., or (a)."""
 
         # Examples:
         #
@@ -275,6 +290,7 @@ class SmartChunker:
         self,
         text: str,
     ) -> list[str]:
+        """Fallback splitter that cuts oversized text at sentence boundaries or a hard character limit."""
 
         chunks = []
 
@@ -323,6 +339,7 @@ class SmartChunker:
         self,
         chunks: list[str],
     ) -> list[str]:
+        """Combine nearby short sub-clause fragments into a single chunk when possible."""
 
         merged = []
 
