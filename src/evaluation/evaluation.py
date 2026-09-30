@@ -9,15 +9,14 @@ and grounding checks on legal question-answer pairs.
 
 
 def chunk_id(metadata: dict) -> tuple:
-    """Build a stable identifier for a chunk from its metadata.
+    """Build a comparable identifier from a chunk's source metadata.
 
     Args:
-        metadata (dict): A chunk metadata dictionary containing page, article,
-            and clause fields.
+        metadata: Chunk metadata containing ``page``, ``article``, and
+            ``clause`` keys.
 
     Returns:
-        tuple: A tuple of (page, article, clause) used to compare chunks across
-        retrieval results and ground-truth labels.
+        A tuple of page, article, and clause values.
     """
     return (
         metadata["page"],
@@ -26,16 +25,17 @@ def chunk_id(metadata: dict) -> tuple:
     )
 
 def precision_at_k(results, relevant_ids: set[str], k: int) -> float:
-    """Measure how many of the top-k retrieved chunks are actually relevant.
-    
-        Args:
-            results: A list-like collection of retrieved chunk objects, each with a
-                metadata attribute.
-            relevant_ids (set): The set of ground-truth relevant chunk IDs.
-            k (int): The number of top results to evaluate.
-    
-        Returns:
-            float: The fraction of retrieved results within the top-k that are relevant.
+    """Calculate the fraction of the top ``k`` results labeled relevant.
+
+    Args:
+        results: Ordered retrieved chunks, each with a ``metadata`` mapping
+            containing a ``chunk_id`` value.
+        relevant_ids: Ground-truth identifiers for relevant chunks.
+        k: Number of leading results included in the precision calculation.
+
+    Returns:
+        The number of relevant IDs among ``results[:k]`` divided by ``k``.
+        The value is in the range 0.0 to 1.0 when ``k`` is positive.
     """
     retrieved_ids = [
         result.metadata["chunk_id"]
@@ -55,17 +55,18 @@ def precision_at_k(results, relevant_ids: set[str], k: int) -> float:
 
 
 def recall_at_k(results, relevant_ids: set[str], k: int) -> float:
-    """Measure how many relevant chunks were successfully recovered in the top-k.
-    
-        Args:
-            results: A list-like collection of retrieved chunk objects, each with a
-                metadata attribute.
-            relevant_ids (set): The set of ground-truth relevant chunk IDs.
-            k (int): The number of top results to consider for retrieval recall.
-    
-        Returns:
-            float: The proportion of all relevant chunks that appear in the top-k.
-        """
+    """Calculate the fraction of all relevant IDs found in the top ``k`` results.
+
+    Args:
+        results: Ordered retrieved chunks, each with a ``metadata`` mapping
+            containing a ``chunk_id`` value.
+        relevant_ids: Ground-truth identifiers for relevant chunks.
+        k: Number of leading results checked for relevant IDs.
+
+    Returns:
+        The number of relevant IDs among ``results[:k]`` divided by the number
+        of ground-truth IDs, or ``0.0`` when ``relevant_ids`` is empty.
+    """
     retrieved_ids = [
         result.metadata["chunk_id"]
         for result in results[:k]

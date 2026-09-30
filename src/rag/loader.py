@@ -6,16 +6,36 @@ from pypdf import PdfReader
 
 @dataclass
 class DocumentPage:
+    """Store extracted text and its source location for one PDF page.
+
+    Attributes:
+        text: Extracted and trimmed text content of the page.
+        source: Name of the PDF file containing the page.
+        page: Zero-based page index reported by the PDF reader.
+    """
+
     text: str
     source: str
     page: int
 
 
 class PDFLoader:
-    """Load one or more PDF files and return their page text as strings."""
+    """Extract page text from a PDF file or all PDFs in a directory."""
 
     def load(self, path: str) -> list[DocumentPage]:
-        """Read a PDF file or a directory of PDFs and return all extracted page texts."""
+        """Read PDF pages and preserve each page's source file and page index.
+
+        Args:
+            path: Path to one PDF file or a directory of PDF files.
+
+        Returns:
+            DocumentPage records for pages containing extractable text, ordered
+            by file name and then by page.
+
+        Raises:
+            FileNotFoundError: The given path does not exist.
+            ValueError: The path is a file whose extension is not PDF.
+        """
         path = Path(path)
 
         if path.is_dir():
