@@ -8,27 +8,42 @@ This project is a retrieval-augmented generation (RAG) assistant for UAE legisla
 
 ```mermaid
 flowchart LR
-    User["User question"] --> Graph["LangGraph workflow"]
-    Graph --> Retrieve["retrieve_node\nVector retrieval"]
-    Retrieve --> Chroma[("Chroma vector store")]
-    Chroma --> Candidate["candidate chunks"]
-    Candidate --> Rerank["rerank_node\nBGE reranking"]
-    Rerank --> Context["build_context_node\nformat legal context"]
-    Context --> Prompt["build_prompt_node\nassemble system + user prompt"]
-    Prompt --> LLM["OpenAILLM\nAzure OpenAI-compatible endpoint"]
-    LLM --> Answer["Final answer"]
+    classDef user fill:#E0F2FE,stroke:#0284C7,stroke-width:2px,color:#0F172A;
+    classDef core fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#052E16;
+    classDef data fill:#F3E8FF,stroke:#7C3AED,stroke-width:2px,color:#2E1065;
+    classDef model fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#451A03;
+    classDef answer fill:#FCE7F3,stroke:#DB2777,stroke-width:2px,color:#4C0519;
 
-    subgraph Indexing["Document indexing pipeline"]
-        Docs["PDFs in data/"] --> Loader["PDFLoader"]
-        Loader --> Chunker["SmartChunker"]
-        Chunker --> Embed["BGE embeddings"]
-        Embed --> Index[("Persistent Chroma index")]
+    U["User question"]:::user
+    G["LangGraph workflow"]:::core
+    R["Retrieve"]:::core
+    C[("ChromaDB") ]:::data
+    RR["Rerank"]:::core
+    CT["Build context"]:::core
+    P["Build prompt"]:::core
+    M["OpenAI / Azure model"]:::model
+    A["Answer"]:::answer
+
+    U --> G --> R --> C
+    C --> RR --> CT --> P --> M --> A
+
+    subgraph Index["Document ingestion pipeline"]
+        D["Legal PDFs"]:::data
+        L["PDFLoader"]:::core
+        S["SmartChunker"]:::core
+        E["BGE embeddings"]:::model
+        I[("Vector index")]:::data
+        D --> L --> S --> E --> I
     end
 
-    subgraph Eval["Optional evaluation pipeline"]
-        EvalData["Evaluation dataset"] --> Metrics["Precision@k / Recall@k / MRR"]
-        Metrics --> Results["retrieval metrics"]
+    subgraph Eval["Evaluation layer"]
+        Data["Evaluation dataset"]:::data
+        Metrics["Precision / Recall / MRR"]:::core
+        Data --> Metrics
     end
+
+    R -. vector search .-> I
+    Metrics -. benchmark .-> G
 ```
 
 ## How the current application works
