@@ -1,5 +1,7 @@
 """Embed legislation questions and retrieve matching chunks from Chroma."""
 
+from .rag import Chunk
+
 from .embeddings import BGEEmbeddingModel
 from .vectore_store import ChromaVectorStore
 
@@ -33,7 +35,7 @@ class VectorRetriever:
         self,
         question: str,
         top_k: int = 20,
-    ) -> dict:
+    ) -> list[Chunk]:
         """Find the most relevant chunks for a question.
 
         Args:

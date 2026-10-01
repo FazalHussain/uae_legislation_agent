@@ -195,12 +195,7 @@ class RAG:
             metadata=[chunk.metadata for chunk in chunks],
         )
 
-    def retrieve(
-        self,
-        question: str,
-        candidate_k: int = 20,
-        top_k: int = 5
-    ) -> list[Chunk]:
+    def retrieve(self, question: str, top_k: int = 5) -> list[Chunk]:
         """Retrieve candidate passages and rerank them for a legal question.
 
         Args:
@@ -212,14 +207,37 @@ class RAG:
             The highest-ranked chunks, including their text and source metadata.
         """
 
-        candidates = self.retriever.retrieve(
-            question,
-            candidate_k
-        )
+        return self.retriever.retrieve(question, top_k=top_k)
+
+    def rerank(
+        self,
+        question: str,
+        chunks: list,
+        top_k: int = 5,
+    ) -> list[Chunk]:
+        """Rescore candidate chunks against a question and return the top results.
+
+        Args:
+            question: Natural-language question used to score candidate passages.
+            chunks: Candidate chunks to score and order.
+            top_k: Maximum number of ranked chunks to return.
+
+        Returns:
+            The highest-scoring chunks in descending relevance order.
+        """
 
         return self.reranker.rerank(
             question,
-            candidates,
-            top_k
+            chunks,
+            top_k=top_k,
         )
 
+    def format_context(self, chunks) -> str:
+        """Format retrieved chunks into LLM-friendly context."""
+
+        formatted_chunks = []
+
+        for index, chunk in enumerate(chunks, start=1):
+            formatted_chunks.append(f"--- Context {index} ---\n" f"{chunk}")
+
+        return "\n\n".join(formatted_chunks)
