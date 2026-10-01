@@ -8,42 +8,21 @@ This project is a retrieval-augmented generation (RAG) assistant for UAE legisla
 
 ```mermaid
 flowchart LR
-    classDef user fill:#E0F2FE,stroke:#0284C7,stroke-width:2px,color:#0F172A;
-    classDef core fill:#DCFCE7,stroke:#16A34A,stroke-width:2px,color:#052E16;
-    classDef data fill:#F3E8FF,stroke:#7C3AED,stroke-width:2px,color:#2E1065;
-    classDef model fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#451A03;
-    classDef answer fill:#FCE7F3,stroke:#DB2777,stroke-width:2px,color:#4C0519;
-
-    U["User question"]:::user
-    G["LangGraph workflow"]:::core
-    R["Retrieve"]:::core
-    C[("ChromaDB") ]:::data
-    RR["Rerank"]:::core
-    CT["Build context"]:::core
-    P["Build prompt"]:::core
-    M["OpenAI / Azure model"]:::model
-    A["Answer"]:::answer
-
-    U --> G --> R --> C
-    C --> RR --> CT --> P --> M --> A
+    U["User question"] --> G["LangGraph workflow"]
+    G --> R["Retrieve relevant passages"]
+    R --> V[("Chroma vector store")]
+    V --> RR["Rerank top results"]
+    RR --> C["Build legal context"]
+    C --> P["Prepare model prompt"]
+    P --> M["LLM answer generation"]
+    M --> A["Final answer"]
 
     subgraph Index["Document ingestion pipeline"]
-        D["Legal PDFs"]:::data
-        L["PDFLoader"]:::core
-        S["SmartChunker"]:::core
-        E["BGE embeddings"]:::model
-        I[("Vector index")]:::data
-        D --> L --> S --> E --> I
+        D["Legal PDFs"] --> L["PDFLoader"] --> S["SmartChunker"] --> E["BGE embeddings"] --> I[("Indexed chunks")]
     end
 
-    subgraph Eval["Evaluation layer"]
-        Data["Evaluation dataset"]:::data
-        Metrics["Precision / Recall / MRR"]:::core
-        Data --> Metrics
-    end
-
-    R -. vector search .-> I
-    Metrics -. benchmark .-> G
+    V -. stores data .-> I
+    I -. used for retrieval .-> R
 ```
 
 ## How the current application works
