@@ -34,7 +34,7 @@ class OpenAILLM:
     def __init__(
         self,
         model_name: str = "gpt-4.1-mini",
-        max_tokens: int = 400,
+        max_tokens: int = 500,
     ):
         """Configure the model, temperature, and output limit for generation.
 

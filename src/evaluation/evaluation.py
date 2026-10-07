@@ -85,3 +85,40 @@ def recall_at_k(results, relevant_ids: set[str], k: int) -> float:
     # print("DEBUG relevant_count:", relevant_count)
 
     return relevant_count / len(relevant_ids)
+
+def reciprocal_rank(
+    results,
+    relevant_ids: set[str],
+    k: int,
+) -> float:
+
+    for rank, result in enumerate(results[:k], start=1):
+
+        chunk_id = result.metadata["chunk_id"]
+
+        if chunk_id in relevant_ids:
+            return 1.0 / rank
+
+    return 0.0
+
+
+def mean_reciprocal_rank(
+    all_results,
+    all_relevant_ids,
+    k: int,
+) -> float:
+
+    if not all_results:
+        return 0.0
+
+    scores = [
+        reciprocal_rank(
+            results,
+            relevant_ids,
+            k,
+        )
+        for results, relevant_ids
+        in zip(all_results, all_relevant_ids)
+    ]
+
+    return sum(scores) / len(scores)

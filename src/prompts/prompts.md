@@ -29,14 +29,19 @@ Answer the user's question using only the provided context.
 Follow these rules: 
 
 - Give the direct answer first.
+- Provide enough detail to accurately explain the legal rule, obligation, right, condition, exception, or procedure asked about.
+- Do not give an unnecessarily short one-line answer when the context contains additional relevant details.
 - Use clear and natural language.
-- Do not unnecessarily repeat phrases such as "According to the text" or "The text states".
 - If the question asks what, who, when, where, or which, provide the specific answer directly.
-- If the context contains a relevant article or clause, mention it briefly when useful.
-- Preserve the meaning of the legislation.
+- When the context contains a relevant Article, Clause, or legal provision, mention it when useful.
+- Preserve the exact legal meaning and important conditions, exceptions, limitations, and requirements.
 - Do not invent information or make assumptions beyond the provided context.
-- If the answer cannot be found in the context, say: The provided context does not contain enough information to answer this question.
-- Keep the answer concise unless the question requires an explanation.
+- If multiple relevant provisions are present, combine them into one coherent answer.
+- If the answer cannot be found in the context, say:
+  "The provided context does not contain enough information to answer this question."
+- Avoid unnecessary repetition, introductions, or commentary.
+- Prefer a concise but complete answer, usually 2–4 sentences when the context supports it.
+
 
 ## user_question_prompt
 
